@@ -4,7 +4,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import ru.mrsu.catsapp.R
+import ru.mrsu.catsapp.databinding.ItemCatBinding
 import ru.mrsu.catsapp.model.Cat
 
 /**
@@ -12,13 +14,9 @@ import ru.mrsu.catsapp.model.Cat
  * @since 30.03.21
  */
 class CatItemVH(
-    view: View,
+    private val binding: ItemCatBinding,
     val onCatClickListener: (Cat) -> Unit
-) : RecyclerView.ViewHolder(view) {
-
-    private val ivCat = itemView.findViewById<ImageView>(R.id.ivCat)
-    private val tvDescription = itemView.findViewById<TextView>(R.id.tvDescription)
-    private val tvName = itemView.findViewById<TextView>(R.id.tvName)
+) : RecyclerView.ViewHolder(binding.root) {
 
     private var cat: Cat? = null
 
@@ -32,9 +30,13 @@ class CatItemVH(
 
     fun bind(cat: Cat) {
         this.cat = cat
-        ivCat.setImageResource(cat.avatar)
-        tvDescription.text = cat.description
-        tvName.text = cat.name
+        Glide.with(itemView)
+            .load(cat.avatar)
+            .placeholder(R.drawable.ic_cat_placeholder)
+            .error(R.drawable.ic_cat_placeholder)
+            .into(binding.ivCat)
+        binding.tvDescription.text = cat.description
+        binding.tvName.text = cat.name
     }
 
 }

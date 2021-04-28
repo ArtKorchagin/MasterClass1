@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">CatsApp</string>
+    <string name="repeat">Повторить</string>
+    <string name="something_wrong">Что-то пошло не так</string>
+    <string name="name">Кличка</string>
+    <string name="description">Описание</string>
+    <string name="create">Создать</string>
+    <string name="fill_fields">Заполните поля</string>
+    <string name="cat_created">Кот Успешно создан!</string>
 </resources>

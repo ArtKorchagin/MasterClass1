@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.mrsu.catsapp.R
+import ru.mrsu.catsapp.databinding.ItemCatBinding
 import ru.mrsu.catsapp.model.Cat
 
 /**
@@ -11,15 +12,14 @@ import ru.mrsu.catsapp.model.Cat
  * @since 30.03.21
  */
 class CatsAdapter(
-    val catsList: List<Cat>,
+    var catsList: List<Cat> = emptyList(),
     val onCatClickListener: (Cat) -> Unit
 ) : RecyclerView.Adapter<CatItemVH>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CatItemVH {
-        val view = LayoutInflater
-            .from(parent.context)
-            .inflate(R.layout.item_cat, parent, false)
-        return CatItemVH(view, onCatClickListener)
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = ItemCatBinding.inflate(layoutInflater, parent, false)
+        return CatItemVH(binding, onCatClickListener)
     }
 
     override fun onBindViewHolder(holder: CatItemVH, position: Int) {

@@ -1,40 +1,21 @@
 package ru.mrsu.catsapp
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import ru.mrsu.catsapp.adapter.CatsAdapter
+import ru.mrsu.catsapp.databinding.ActivityMainBinding
 import ru.mrsu.catsapp.model.Cat
-import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
-    val catImages = listOf<Int>(
-        R.drawable.cat_1,
-        R.drawable.cat_2,
-        R.drawable.cat_3,
-        R.drawable.cat_4,
-        R.drawable.cat_5,
-        R.drawable.cat_6,
-        R.drawable.cat_7,
-        R.drawable.cat_8,
-        R.drawable.cat_9,
-        R.drawable.cat_10,
-        R.drawable.cat_11,
-        R.drawable.cat_12,
-    )
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        val rvList = findViewById<RecyclerView>(R.id.rvList)
-
-        rvList.layoutManager = LinearLayoutManager(this)
-        rvList.adapter = CatsAdapter(generateCats()) {
+    private val catsAdapter: CatsAdapter by lazy {
+        CatsAdapter {
             val intent = Intent(this, CatActivity::class.java)
             intent.putExtra("name", it.name)
             intent.putExtra("description", it.description)
@@ -43,22 +24,53 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun generateCats(): List<Cat> {
-        return catImages.map { resId ->
-                Cat(
-                    avatar = resId,
-                    name = generateName(5),
-                    description =  generateName(50)
-                )
-            }
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.rvList.layoutManager = LinearLayoutManager(this)
+        binding.rvList.adapter = catsAdapter
+        binding.fabCreateCat.setOnClickListener {
+            startActivity(Intent(this, CreateCatActivity::class.java))
+            finish()
+        }
+        loadCats()
     }
 
-    private fun generateName(count : Int): String {
-        return generateSequence {
-            Random.nextInt('a'.toInt(), 'z'.toInt()).toChar()
-        }
-            .take(count)
-            .joinToString(separator = "")
+    private fun loadCats() {
+        setLoading(true)
+        return NetworkService
+            .loadCats()
+            .enqueue(object : Callback<List<Cat>> {
+                override fun onResponse(call: Call<List<Cat>>, response: Response<List<Cat>>) {
+                    setLoading(false)
+                    catsAdapter.catsList = response.body() ?: emptyList()
+                    catsAdapter.notifyDataSetChanged()
+                }
+
+                override fun onFailure(call: Call<List<Cat>>, t: Throwable) {
+                    setError(t.message ?: getString(R.string.something_wrong))
+                }
+            })
     }
+
+    private fun setError(errorText: String) {
+        binding.progressIndicator.isVisible = false
+        binding.lError.isVisible = true
+        binding.tvError.text = errorText
+        binding.btnRepeat.setOnClickListener {
+            loadCats()
+        }
+    }
+
+    private fun setLoading(isLoading: Boolean) {
+        binding.lError.isVisible = false
+        binding.progressIndicator.isVisible = isLoading
+        binding.rvList.isVisible = !isLoading
+    }
+
 
 }

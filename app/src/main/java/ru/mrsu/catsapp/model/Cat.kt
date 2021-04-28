@@ -9,6 +9,5 @@ import androidx.annotation.DrawableRes
 data class Cat(
     val name : String,
     val description: String,
-    @DrawableRes
-    val avatar: Int,
+    val avatar: String,
 )
